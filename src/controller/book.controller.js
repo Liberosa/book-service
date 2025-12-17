@@ -24,7 +24,7 @@ export const addBook = async (req, res) => {
                 authorRecord = await Author.create({name: author.name, birth_date: new Date(author.birthDate)},
                     {transaction: t});
             }
-            if (authorRecord.findIndex((a) => a.name === authorRecord.name) === -1) {
+            if (authorRecords.findIndex((a) => a.name === authorRecord.name) === -1) {
                 authorRecords.push(authorRecord);
             }
         }
@@ -42,3 +42,21 @@ export const addBook = async (req, res) => {
     }
 };
 
+export const findBookByIsbn = async (req, res) => {
+    const book = await Book.findByPk(req.params.isbn);
+    console.log(await book.getAuthors());
+    if (book) {
+        const result = {
+            isbn: book.isbn,
+            title: book.title,
+            publisher: book.publisher,
+            authors: (await book.getAuthors()).map(author => ({
+                name: author.dataValues.name,
+                birthDate: author.dataValues.birth_date,
+            })),
+        };
+        return res.json(result);
+    } else {
+        return res.status(404).send({error: `Book with ISBN ${req.params.isbn} not found`});
+    }
+};

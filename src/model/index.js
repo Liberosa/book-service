@@ -31,7 +31,7 @@ const BooksAuthors = sequelize.define('BooksAuthors', {
             }
         }
     }
-}, {tableName: 'books_authors'},{timestamps: false});
+}, {tableName: 'books_authors'}, {timestamps: false});
 
 Book.belongsToMany(Author, {
     through: BooksAuthors,
@@ -55,4 +55,4 @@ const syncModels = async () => {
     }
 };
 
-export  {syncModels, Book, Author, Publisher};
+export {syncModels, Book, Author, Publisher};
