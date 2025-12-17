@@ -2,7 +2,7 @@ import {Author, Book, Publisher} from "../model/index.js";
 import {sequelize} from "../config/database.js";
 
 export const addBook = async (req, res) => {
-    const t = await sequelize.transaction();
+    const t = await sequelize.transaction({readOnly: true});
     try {
         const {isbn, title, authors, publisher} = req.body;
         const existingBook = await Book.findByPk(isbn);
@@ -13,18 +13,20 @@ export const addBook = async (req, res) => {
             })
         }
         let publisherRecord = await Publisher.findByPk(publisher);
-        if (!publisherRecord) {
-            publisherRecord = await Publisher.create({publisher_name: publisher},
+        if (!await Publisher.findByPk(publisher, {transaction: t})) {
+            await Publisher.create({publisher_name: publisher},
                 {transaction: t})
         }
         const authorRecords = [];
         for (const author of authors) {
-            let authorRecord = await Author.findByPk(author.name);
+            let authorRecord = await Author.findByPk(author.name, {transaction: t});
             if (!authorRecord) {
                 authorRecord = await Author.create({name: author.name, birth_date: new Date(author.birthDate)},
                     {transaction: t});
             }
-            authorRecords.push(authorRecord);
+            if (authorRecord.findIndex((a) => a.name === authorRecord.name) === -1) {
+                authorRecords.push(authorRecord);
+            }
         }
         const book = await Book.create({isbn, title, publisher},
             {transaction: t});
