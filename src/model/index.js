@@ -31,17 +31,17 @@ const BooksAuthors = sequelize.define('BooksAuthors', {
             }
         }
     }
-}, {tableName: 'books_authors'});
+}, {tableName: 'books_authors'},{timestamps: false});
 
 Book.belongsToMany(Author, {
     through: BooksAuthors,
     foreignKey: 'isbn',
     otherKey: 'author_name',
-    as: 'books',
+    as: 'authors',
 });
 Author.belongsToMany(Book, {
     through: BooksAuthors,
-    foreignKey: 'publisher',
+    foreignKey: 'author_name',
     otherKey: 'isbn',
     as: 'books'
 });
